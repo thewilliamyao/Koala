@@ -31,8 +31,8 @@ const fs = require('fs');
 const record = require('node-record-lpcm16');
 const speech = require('@google-cloud/speech')();
 
-var l1 = 'en';
-var l2 = 'es';
+var l1 = 'en-US';
+var l2 = 'es-ES';
 
 var l1conf = 0;
 var l2conf = 0;
@@ -43,49 +43,53 @@ var l2Active = false;
 
 // [START speech_sync_recognize]
 function syncRecognize (filename, callback) {
-  // Detect speech in the audio file, e.g. "./resources/audio.raw"
-  speech.recognize(filename, {
-    encoding: 'LINEAR16',
-    sampleRate: 16000,
-    languageCode: 'fr'
-  }, (err, results) => {
-    if (err) {
-      callback(err);
-      return;
-    }
+	// Detect speech in the audio file, e.g. "./resources/audio.raw"
+	speech.recognize(filename, {
+		encoding: 'LINEAR16',
+		sampleRate: 16000,
+		languageCode: 'fr'
+	}, (err, results) => {
+		if (err) {
+			callback(err);
+			return;
+		}
 
-    console.log('Results:', results);
-	translate(results, 'en');
-    callback();
-  });
+		console.log('Results:', results);
+		translate(results, 'en');
+		callback();
+	});
 }
 // [END speech_sync_recognize]
 
 // [START speech_streaming_recognize]
 function streamingRecognize (filename, callback) {
-  const options = {
-    config: {
-      encoding: 'LINEAR16',
-      sampleRate: 16000
-    }
-  };
+	const options = {
+		config: {
+			encoding: 'LINEAR16',
+			sampleRate: 16000
+		}
+	};
 
-  // Create a recognize stream
-  const recognizeStream = speech.createRecognizeStream(options)
-    .on('error', callback)
-    .on('data', (data) => {
-      console.log('Data received: %j', data);
-      callback();
-    });
+	// Create a recognize stream
+	const recognizeStream = speech.createRecognizeStream(options)
+	.on('error', callback)
+	.on('data', (data) => {
+		console.log('Data received: %j', data);
+		callback();
+	});
 
-  // Stream an audio file from disk to the Speech API, e.g. "./resources/audio.raw"
-  fs.createReadStream(filename).pipe(recognizeStream);
+	// Stream an audio file from disk to the Speech API, e.g. "./resources/audio.raw"
+	fs.createReadStream(filename).pipe(recognizeStream);
 }
 // [END speech_streaming_recognize]
 
 function startRecord() {
-	streamingMicRecognize(true);
-	streamingMicRecognize(false);
+	var stream1 = streamingMicRecognize(true);
+	var stream2 = streamingMicRecognize(false);
+
+	var mic = record.start({ sampleRate: 16000 });
+	mic.pipe(stream1);
+	mic.pipe(stream2);
 }
 
 function interrupt() {
@@ -102,74 +106,85 @@ function setl2(str) {
 
 // [START speech_streaming_mic_recognize]
 function streamingMicRecognize (isl1) {
-  var lang = l2;
-  var langOpp = l1
-  if (isl1) {
-    lang = l1;
-	langOpp = l2;
-  }
+	var lang = l2;
+	var langOpp = l1
+	if (isl1) {
+		lang = l1;
+		langOpp = l2;
+	}
 
-  const options = {
-    config: {
-      encoding: 'LINEAR16',
-      sampleRate: 16000,
-      languageCode: lang
-    }
-  };
+	const options = {
+		config: {
+			encoding: 'LINEAR16',
+			sampleRate: 16000,
+			languageCode: lang
+		}
+	};
 
-  // Create a recognize stream
-  const recognizeStream = speech.createRecognizeStream(options)
-    .on('error', console.error)
-    .on('data', (data) => {
+	// Create a recognize stream
+	const recognizeStream = speech.createRecognizeStream(options)
+	.on('error', console.error)
+	.on('data', (data) => {
 		//process.stdout.write(data.results);
 		if (isl1) {
-			l1conf = data.confidence;
-			if (l1 >= l2) {
+			l1conf = confidence(data);
 				if (!l1Active) {
 					process.stdout.write('||1||');
 					l1Active = true;
 					l2Active = false;
 				}
-				translate(data.results, langOpp);
+				translate(data.results, langOpp.substring(0,2));
 			}
 		}
 		else {
-			l2conf = data.confidence;
-			if (l2 > l1) {
+			l2conf = confidence(data);
 				if (!l2Active) {
 					process.stdout.write('||2||');
 					l2Active = true;
 					l1Active = false;
 				}
-				translate(data.results, langOpp);
+				translate(data.results, langOpp.substring(0,2));
 			}
 		}
 	});
-
-  // Start recording and send the microphone input to the Speech API
-  record.start({ sampleRate: 16000 }).pipe(recognizeStream);
+	
+	// Start recording and send the microphone input to the Speech API
+	//record.start({ sampleRate: 16000 }).pipe(recognizeStream);
 }
 // [END speech_streaming_mic_recognize]
 
-function translate(input, target) {
-  const Translate = require('@google-cloud/translate');
-  // Instantiates a client
-  const translate = Translate({
-    // The Translate API uses an API key for authentication. This sample looks
-    // for the key in an environment variable.
-    key: 'AIzaSyCP-TFmvNTa7JuoQCNt0q5f8WjzT_IVkIc'
-  });
+function confidence(data) {
+	if (data.results != null) {
+		var n = results.length;
+		for (var i = 0; i < n; i++) {
+			if (data.results[i].stability != null) {
+				n -= data.results[i].stability;
+			}
+		}
+		return n;
+	}
+	return 10;
+}
 
-  // Translates the text into the target language. "input" can be a string for
-  // translating a single piece of text, or an array of strings for translating
-  // multiple texts.
-  translate.translate(input, target, (err, translation) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    process.stdout.write(translation);
-  });
+
+function translate(input, target) {
+	const Translate = require('@google-cloud/translate');
+	// Instantiates a client
+	const translate = Translate({
+		// The Translate API uses an API key for authentication. This sample looks
+		// for the key in an environment variable.
+	});
+
+	// Translates the text into the target language. "input" can be a string for
+	// translating a single piece of text, or an array of strings for translating
+	// multiple texts.
+	translate.translate(input, target, (err, translation) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+		process.stdout.write(translation);
+	});
 }
 
 // The command-line program
@@ -177,18 +192,18 @@ var cli = require('yargs');
 var utils = require('../utils');
 
 var program = module.exports = {
-  syncRecognize: syncRecognize,
-  streamingRecognize: streamingRecognize,
-  streamingMicRecognize: streamingMicRecognize,
-  interrupt: interrupt,
-  startRecord: startRecord,
-  translate: translate,
-  setl1: setl1,
-  setl2: setl2,
-  main: function (args) {
-    // Run the command-line program
-    cli.help().strict().parse(args).argv;
-  }
+syncRecognize: syncRecognize,
+streamingRecognize: streamingRecognize,
+streamingMicRecognize: streamingMicRecognize,
+interrupt: interrupt,
+startRecord: startRecord,
+translate: translate,
+setl1: setl1,
+setl2: setl2,
+main: function (args) {
+		// Run the command-line program
+		cli.help().strict().parse(args).argv;
+	}
 };
 
 cli
