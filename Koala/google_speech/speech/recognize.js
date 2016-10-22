@@ -128,6 +128,7 @@ function streamingMicRecognize (isl1) {
 		//process.stdout.write(data.results);
 		if (isl1) {
 			l1conf = confidence(data);
+			if (l1conf <= l2conf) {
 				if (!l1Active) {
 					process.stdout.write('||1||');
 					l1Active = true;
@@ -138,6 +139,7 @@ function streamingMicRecognize (isl1) {
 		}
 		else {
 			l2conf = confidence(data);
+			if (l2conf < l1conf) {
 				if (!l2Active) {
 					process.stdout.write('||2||');
 					l2Active = true;
@@ -173,6 +175,7 @@ function translate(input, target) {
 	const translate = Translate({
 		// The Translate API uses an API key for authentication. This sample looks
 		// for the key in an environment variable.
+		key: 'AIzaSyCP-TFmvNTa7JuoQCNt0q5f8WjzT_IVkIc'
 	});
 
 	// Translates the text into the target language. "input" can be a string for
