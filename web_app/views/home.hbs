@@ -165,7 +165,7 @@
                   recognition.onstart = function() {
                     recognizing = true;
                     showInfo('info_speak_now');
-                    start_img.src = 'mic-animate.gif';
+                    // start_img.src = 'mic-animate.gif';
                   };
                   recognition.onerror = function(event) {
                     if (event.error == 'no-speech') {
@@ -192,7 +192,7 @@
                     if (ignore_onend) {
                       return;
                     }
-                    start_img.src = 'mic.gif';
+                    // start_img.src = 'mic.gif';
                     if (!final_transcript) {
                       showInfo('info_start');
                       return;
@@ -218,9 +218,19 @@
                         interim_transcript += event.results[i][0].transcript;
                       }
                     }
+                    // translate(final_transcript, 'en');
                     final_transcript = capitalize(final_transcript);
                     final_span.innerHTML = linebreak(final_transcript);
                     interim_span.innerHTML = linebreak(interim_transcript);
+                    
+                    if (final_transcript) {
+                      startTranslate(final_transcript, 'fr');
+                    }
+
+                    if (interim_transcript) {
+                      startTranslate(interim_transcript, 'fr');
+                    }
+                    
                     if (final_transcript || interim_transcript) {
                       showButtons('inline-block');
                     }
@@ -239,15 +249,6 @@
                 function capitalize(s) {
                   return s.replace(first_char, function(m) { return m.toUpperCase(); });
                 }
-                function createEmail() {
-                  var n = final_transcript.indexOf('\n');
-                  if (n < 0 || n >= 80) {
-                    n = 40 + final_transcript.substring(40).indexOf(' ');
-                  }
-                  var subject = encodeURI(final_transcript.substring(0, n));
-                  var body = encodeURI(final_transcript.substring(n + 1));
-                  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
-                }
                 function startButton(event) {
                   if (recognizing) {
                     recognition.stop();
@@ -265,7 +266,7 @@
                   start_timestamp = event.timeStamp;
                 }
                 
-                function startButton(event) {
+                function startButtonFront(event) {
                   if (recognizing) {
                     recognition.stop();
                     return;
@@ -281,7 +282,43 @@
                   showButtons('none');
                   start_timestamp = event.timeStamp;
                 }
+                
+                function startTranslate(message, country) {
+                  console.log(message);
+                  console.log(country);
+                  return $.ajax({
+                      url: '/translate',
+                      type: 'POST',
+                      dataType: 'json',
+                      data: {
+                        data_message : message,
+                        data_country : country
+                      }
+                  }).done(function (data) {
+                    console.log(data)
+                  });
+                }
 
+                // function translate(input, target) {
+                //   const Translate = require('@google-cloud/translate');
+                //   // Instantiates a client
+                //   const translate = Translate({
+                //     // The Translate API uses an API key for authentication. This sample looks
+                //     // for the key in an environment variable.
+                //     key: 'AIzaSyCP-TFmvNTa7JuoQCNt0q5f8WjzT_IVkIc'
+                //   });
+
+                //   // Translates the text into the target language. "input" can be a string for
+                //   // translating a single piece of text, or an array of strings for translating
+                //   // multiple texts.
+                //   translate.translate(input, target, (err, translation) => {
+                //     if (err) {
+                //       console.error(err);
+                //       return;
+                //     }
+                //     console.log(translation);
+                //   });
+                // }  
 
                 function showInfo(s) {
                   if (s) {
@@ -303,3 +340,4 @@
                   current_style = style;
                 }
               </script>
+            
