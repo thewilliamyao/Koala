@@ -51,11 +51,13 @@
 
             <div id="results-you">
               <span id="final_span_you" class="final"></span>
-              <span id="interim_span_you" class="interim"></span>
+              <!-- <span id="interim_span_you" class="interim"></span> -->
               <p>
             </div>
               
               <script>
+                var upper_translated = '';
+
                 var langs =
                 [['Afrikaans',       ['af-ZA']],
                 ['Bahasa Indonesia',['id-ID']],
@@ -223,13 +225,13 @@
                     final_span.innerHTML = linebreak(final_transcript);
                     interim_span.innerHTML = linebreak(interim_transcript);
                     
-                    if (final_transcript) {
-                      startTranslate(final_transcript, 'fr');
-                    }
+                    // if (final_transcript) {
+                    //   startTranslate(final_transcript, 'fr');
+                    // }
 
-                    if (interim_transcript) {
-                      startTranslate(interim_transcript, 'fr');
-                    }
+                    
+                    startTranslate(interim_transcript, 'zh');
+                    
                     
                     if (final_transcript || interim_transcript) {
                       showButtons('inline-block');
@@ -284,19 +286,32 @@
                 }
                 
                 function startTranslate(message, country) {
-                  console.log(message);
-                  console.log(country);
-                  return $.ajax({
-                      url: '/translate',
-                      type: 'POST',
-                      dataType: 'json',
-                      data: {
-                        data_message : message,
-                        data_country : country
-                      }
-                  }).done(function (data) {
-                    console.log(data)
+                  // console.log(message);
+                  // console.log(country);
+                  
+                  socket.emit('untranslated', {
+                            data_message : message,
+                            data_country : country
+                        });
+                  // console.log('emitted')
+                  socket.on('translated', function(data){
+                      console.log(data.tr_message);
+                      final_transcript = data.tr_message;
+                      console.log(upper_translated);
                   });
+
+                  
+                  // return $.ajax({
+                  //     url: '/translate',
+                  //     type: 'POST',
+                  //     dataType: 'json',
+                  //     data: {
+                  //       data_message : message,
+                  //       data_country : country
+                  //     }
+                  // }).done(function (data) {
+                  //   console.log(data)
+                  // });
                 }
 
                 // function translate(input, target) {

@@ -6,11 +6,19 @@
     <title>Express handlebars</title>
   </head>
   <body>
-    {{{body}}}
-    <!-- <script src="/socket.io/socket.io.js"></script>
-    <script>
+  	<script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  	<script>
       console.log('calling console');
         var socket = io();
-    </script> -->
+        // socket.on('translated', function(data){
+        // 	console.log(data);
+        // 	socket.emit('untranslated', {
+        //         data_message : message,
+        //         data_country : country
+        //     });
+        // });
+    </script>
+    {{{body}}}
   </body>
 </html>  
