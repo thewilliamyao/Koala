@@ -67,20 +67,20 @@
                 ['Català',          ['ca-ES']],
                 ['Čeština',         ['cs-CZ']],
                 ['Deutsch',         ['de-DE']],
-                ['English',         ['en-US', 'United States']],
-                ['Español',         ['es-ES', 'España']],
+                ['English',         ['en-US']],
+                ['Español',         ['es-ES']],
                 ['Euskara',         ['eu-ES']],
                 ['Français',        ['fr-FR']],
                 ['Galego',          ['gl-ES']],
                 ['Hrvatski',        ['hr_HR']],
                 ['IsiZulu',         ['zu-ZA']],
                 ['Íslenska',        ['is-IS']],
-                ['Italiano',        ['it-IT', 'Italia']],
+                ['Italiano',        ['it-IT']],
                 ['Magyar',          ['hu-HU']],
                 ['Nederlands',      ['nl-NL']],
                 ['Norsk bokmål',    ['nb-NO']],
                 ['Polski',          ['pl-PL']],
-                ['Português',       ['pt-PT', 'Portugal']],
+                ['Português',       ['pt-PT']],
                 ['Română',          ['ro-RO']],
                 ['Slovenčina',      ['sk-SK']],
                 ['Suomi',           ['fi-FI']],
@@ -90,19 +90,20 @@
                 ['Pусский',         ['ru-RU']],
                 ['Српски',          ['sr-RS']],
                 ['한국어',            ['ko-KR']],
-                ['中文',             ['zh-Hans-CN', '普通话 (中国大陆)']],
+                ['中文',             ['zh-Hans-CN']],
                 ['日本語',           ['ja-JP']],
                 ['Lingua latīna',   ['la']]];
                 for (var i = 0; i < langs.length; i++) {
                   select_language.options[i] = new Option(langs[i][0], i);
                   select_language_front.options[i] = new Option(langs[i][0], i);
                 }
-                select_language.selectedIndex = 6;
+                select_language.selectedIndex = 7;
                 select_language_front.selectedIndex = 6;
-                updateCountry();
-                updateCountryFront();
                 select_dialect.selectedIndex = 0;
                 select_dialect_front.selectedIndex = 0;
+				updateCountry();
+                updateCountryFront();
+                
 				
         				function getCountry(selectObj) {
         					return langs[selectObj.selectedIndex][1][0].substring(0, 2);
@@ -129,7 +130,6 @@
                   }
                   select_dialect_front.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
                 }
-                var create_email = false;
                 var final_transcript = '';
                 var final_transcript_front = '';
                 var recognizing = false;
@@ -153,6 +153,7 @@
                     // start_img.src = 'mic-animate.gif';
                   };
                   recognition.onerror = function(event) {
+					  console.log('ERROR');
                     if (event.error == 'no-speech') {
                       showInfo('info_no_speech');
                       ignore_onend = true;
@@ -171,6 +172,8 @@
                     }
                   };
                   recognition.onend = function() {
+					  console.log('END');
+					  startTranslate(interim_transcript, getCountry(select_language_front), 'upper');
                     recognizing = false;
                     if (ignore_onend) {
                       return;
@@ -189,6 +192,7 @@
                     }
                   };
                   recognition.onresult = function(event) {
+					  console.log('RESULT');
                     var interim_transcript = '';
                     for (var i = event.resultIndex; i < event.results.length; ++i) {
                       if (event.results[i].isFinal) {
@@ -204,10 +208,7 @@
                     // startTranslate(interim_transcript, 'zh', 'upper');
                     // console.log(getCountry(select_language_front));
                     startTranslate(interim_transcript, getCountry(select_language_front), 'upper');
-                    // interim_span.innerHTML = linebreak(interim_transcript);
-                    // if (final_transcript) {
-                    //   startTranslate(final_transcript, 'fr');
-                    // }
+                     interim_span.innerHTML = linebreak(interim_transcript);
 
                     
                     
@@ -249,6 +250,7 @@
                     }
                   };
                   recognition_front.onend = function() {
+					  startTranslate(interim_transcript_front, getCountry(select_language), 'lower');
                     recognizing_front = false;
                     if (ignore_onend) {
                       return;
@@ -278,12 +280,8 @@
                     // translate(final_transcript, 'en');
                     translated_transcript_front = capitalize(translated_transcript_front);
                     final_span_front.innerHTML = linebreak(translated_transcript_front);
-                    // interim_span_front.innerHTML = linebreak(interim_transcript_front);
+                     interim_span_front.innerHTML = linebreak(interim_transcript_front);
                     
-                    // if (final_transcript) {
-                    //   startTranslate(final_transcript, 'fr');
-                    // }
-
                     
 
                     // startTranslate(interim_transcript_front, 'ko', 'lower');
@@ -322,7 +320,7 @@
                     return;
                   }
                   final_transcript = '';
-                  recognition.lang = select_dialect.value;
+                  recognition.lang = select_language.selectedIndex;
                   recognition.start();
                   ignore_onend = false;
                   final_span.innerHTML = '';
@@ -338,7 +336,7 @@
                     return;
                   }
                   final_transcript_front = '';
-                  recognition_front.lang = select_dialect_front.value;
+                  recognition_front.lang = select_language_front.selectedIndex;
                   recognition_front.start();
                   ignore_onend_front = false;
                   final_span_front.innerHTML = '';
@@ -356,18 +354,22 @@
                             data_message : message,
                             data_country : country
                         });
-                  // console.log('emitted')
+                   console.log('emitted')
                   socket.on('translated', function(data){
-                      // console.log(data.tr_message);
+                       console.log(data.tr_message);
                       if (section == 'upper') {
                         translated_transcript = data.tr_message;
+						translated_transcript = capitalize(translated_transcript);
+						final_span.innerHTML = linebreak(translated_transcript);
                       }
                       else {
                         console.log(data.tr_message);
                         translated_transcript_front = data.tr_message;
+						translated_transcript_front = capitalize(translated_transcript_front);
+						final_span_front.innerHTML = linebreak(translated_transcript_front);
                       }
 
-                      // console.log(upper_translated);
+                       console.log(upper_translated);
                   });
 
                   
