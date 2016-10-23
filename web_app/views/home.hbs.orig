@@ -27,9 +27,9 @@
               </div>
               <div class="pressables">
                 <div id="div_language">
-                  <select id="select_language"></select>
+                  <select id="select_language" onchange="updateCountry()"></select>
                   &nbsp;&nbsp;
-                  <select style="display:none" id="select_dialect"></select>
+                  <select id="select_dialect"></select>
                 </div>
               </div>
               <i class="fa fa-arrow-up fa-lg" aria-hidden="true"></i>
@@ -39,9 +39,9 @@
               <i class="fa fa-arrow-down fa-lg" aria-hidden="true"></i>
               <div class="pressables">
                 <div id="div_language_front">
-                  <select id="select_language_front"></select>
+                  <select id="select_language_front" onchange="updateCountryFront()"></select>
                   &nbsp;&nbsp;
-                  <select style="display:none" id="select_dialect_front"></select>
+                  <select id="select_dialect_front"></select>
                 </div>
               </div>
               <div class="pressables">
@@ -90,7 +90,7 @@
                 ['Pусский',         ['ru-RU']],
                 ['Српски',          ['sr-RS']],
                 ['한국어',            ['ko-KR']],
-                ['中文',             ['zh-Hans-CN', '普通话 (中国大陆)']],
+                ['中文',             ['cmn-Hans-CN', '普通话 (中国大陆)']],
                 ['日本語',           ['ja-JP']],
                 ['Lingua latīna',   ['la']]];
                 for (var i = 0; i < langs.length; i++) {
@@ -101,12 +101,12 @@
                 select_language_front.selectedIndex = 6;
                 updateCountry();
                 updateCountryFront();
-                select_dialect.selectedIndex = 0;
-                select_dialect_front.selectedIndex = 0;
+                select_dialect.selectedIndex = 6;
+                select_dialect_front.selectedIndex = 6;
 				
-        				function getCountry(selectObj) {
-        					return langs[selectObj.selectedIndex][1][0].substring(0, 2);
-        				}
+				function getCountry(selectObj) {
+					return lang[selectObj.selectedIndex][1][0].substring(0, 2);
+				}
 				
                 showInfo('info_start');
                 function updateCountry() {
@@ -138,8 +138,6 @@
                 var ignore_onend_front;
                 var start_timestamp_front;
                 var start_timestamp;
-                var translated_transcript = '';
-                var translated_transcript_front = '';
                 if (!('webkitSpeechRecognition' in window)) {
                   upgrade();
                 } else {
@@ -199,11 +197,9 @@
                     }
                     // startTranslate(interim_transcript, 'ko', 'upper');
                     // translate(final_transcript, 'en');
-                    translated_transcript = capitalize(translated_transcript);
-                    final_span.innerHTML = linebreak(translated_transcript);
-                    // startTranslate(interim_transcript, 'zh', 'upper');
-                    // console.log(getCountry(select_language_front));
-                    startTranslate(interim_transcript, getCountry(select_language_front), 'upper');
+                    final_transcript = capitalize(final_transcript);
+                    final_span.innerHTML = linebreak(final_transcript);
+                    startTranslate(interim_transcript, 'zh', 'upper');
                     // interim_span.innerHTML = linebreak(interim_transcript);
                     // if (final_transcript) {
                     //   startTranslate(final_transcript, 'fr');
@@ -276,8 +272,8 @@
                       }
                     }
                     // translate(final_transcript, 'en');
-                    translated_transcript_front = capitalize(translated_transcript_front);
-                    final_span_front.innerHTML = linebreak(translated_transcript_front);
+                    final_transcript_front = capitalize(final_transcript_front);
+                    final_span_front.innerHTML = linebreak(final_transcript_front);
                     // interim_span_front.innerHTML = linebreak(interim_transcript_front);
                     
                     // if (final_transcript) {
@@ -285,10 +281,11 @@
                     // }
 
                     
-
-                    // startTranslate(interim_transcript_front, 'ko', 'lower');
-                    // console.log(getCountry(select_language_front));
-                    startTranslate(interim_transcript_front, getCountry(select_language), 'lower');
+<<<<<<< HEAD
+                    startTranslate(interim_transcript_front, 'ko', 'lower');
+=======
+                    startTranslate(interim_transcript, getCountry(select_language));
+>>>>>>> 577fbdf1d96f95da427e3efd3c0ffad92341a667
                     
                     
                     if (final_transcript_front || interim_transcript_front) {
@@ -338,7 +335,7 @@
                     return;
                   }
                   final_transcript_front = '';
-                  recognition_front.lang = select_dialect_front.value;
+                  recognition_front.lang = select_dialect.value;
                   recognition_front.start();
                   ignore_onend_front = false;
                   final_span_front.innerHTML = '';
@@ -360,11 +357,11 @@
                   socket.on('translated', function(data){
                       // console.log(data.tr_message);
                       if (section == 'upper') {
-                        translated_transcript = data.tr_message;
+                        final_transcript = data.tr_message;
                       }
                       else {
                         console.log(data.tr_message);
-                        translated_transcript_front = data.tr_message;
+                        final_transcript_front = data.tr_message;
                       }
 
                       // console.log(upper_translated);

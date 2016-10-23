@@ -64,20 +64,20 @@
     visibility: hidden;
   }
   #results {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     border: 1px solid #ddd;
-    /*padding: 15px;*/
+    padding: 15px;
     margin: 10px;
     text-align: left;
     min-height: 150px;
     border-radius: 25px;
   }
   #results-front {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     border: 1px solid #ddd;
-    /*padding: 15px;*/
+    padding: 15px;
     margin: 10px;
     text-align: left;
     min-height: 150px;
