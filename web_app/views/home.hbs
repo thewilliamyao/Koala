@@ -20,20 +20,6 @@
               <p>
             </div>
 
-            <div class="facing-you">
-              <i class="fa fa-arrow-down fa-lg" aria-hidden="true"></i>
-              <div class="pressables">
-                <div id="div_language_front">
-                  <select id="select_language_front" onchange="updateCountryFront()"></select>
-                  &nbsp;&nbsp;
-                  <select id="select_dialect_front"></select>
-                </div>
-              </div>
-              <div class="pressables">
-                <button id="start_button_front" onclick="startButtonYou(event)"><i class="fa fa-circle" aria-hidden="true"></i>
-                RECORD</button>
-              </div>
-            </div>
             <div class="facing-me">
               <div class="pressables">
                 <button id="start_button" onclick="startButton(event)"><i class="fa fa-circle" aria-hidden="true"></i>
@@ -49,14 +35,30 @@
               <i class="fa fa-arrow-up fa-lg" aria-hidden="true"></i>
             </div>
 
-            <div id="results-you">
-              <span id="final_span_you" class="final"></span>
-              <!-- <span id="interim_span_you" class="interim"></span> -->
+            <div class="facing-front">
+              <i class="fa fa-arrow-down fa-lg" aria-hidden="true"></i>
+              <div class="pressables">
+                <div id="div_language_front">
+                  <select id="select_language_front" onchange="updateCountryFront()"></select>
+                  &nbsp;&nbsp;
+                  <select id="select_dialect_front"></select>
+                </div>
+              </div>
+              <div class="pressables">
+                <button id="start_button_front" onclick="startButtonFront(event)"><i class="fa fa-circle" aria-hidden="true"></i>
+                RECORD</button>
+              </div>
+            </div>
+
+            <div id="results-front">
+              <span id="final_span_front" class="final"></span>
+              <span id="interim_span_front" class="interim"></span>
               <p>
             </div>
               
               <script>
-                var upper_translated = '';
+                // var upper_translated = '';
+                // var lower_translated = '';
 
                 var langs =
                 [['Afrikaans',       ['af-ZA']],
@@ -154,8 +156,12 @@
                 }
                 var create_email = false;
                 var final_transcript = '';
+                var final_transcript_front = '';
                 var recognizing = false;
+                var recognizing_front = false;
                 var ignore_onend;
+                var ignore_onend_front;
+                var start_timestamp_front;
                 var start_timestamp;
                 if (!('webkitSpeechRecognition' in window)) {
                   upgrade();
@@ -171,12 +177,10 @@
                   };
                   recognition.onerror = function(event) {
                     if (event.error == 'no-speech') {
-                      start_img.src = 'mic.gif';
                       showInfo('info_no_speech');
                       ignore_onend = true;
                     }
                     if (event.error == 'audio-capture') {
-                      start_img.src = 'mic.gif';
                       showInfo('info_no_microphone');
                       ignore_onend = true;
                     }
@@ -206,10 +210,6 @@
                       range.selectNode(document.getElementById('final_span'));
                       window.getSelection().addRange(range);
                     }
-                    if (create_email) {
-                      create_email = false;
-                      createEmail();
-                    }
                   };
                   recognition.onresult = function(event) {
                     var interim_transcript = '';
@@ -217,27 +217,110 @@
                       if (event.results[i].isFinal) {
                         final_transcript += event.results[i][0].transcript;
                       } else {
-                        interim_transcript += event.results[i][0].transcript;
+                        interim_transcript += event.results[i][0].transcript;     
                       }
                     }
+                    // startTranslate(interim_transcript, 'ko', 'upper');
                     // translate(final_transcript, 'en');
                     final_transcript = capitalize(final_transcript);
                     final_span.innerHTML = linebreak(final_transcript);
-                    interim_span.innerHTML = linebreak(interim_transcript);
+                    startTranslate(interim_transcript, 'zh', 'upper');
+                    // interim_span.innerHTML = linebreak(interim_transcript);
+                    // if (final_transcript) {
+                    //   startTranslate(final_transcript, 'fr');
+                    // }
+
+                    
+                    
+                    // if (final_transcript || interim_transcript) {
+                    //   showButtons('inline-block');
+                    // }
+                  };
+                }
+
+
+                if (!('webkitSpeechRecognition' in window)) {
+                  upgrade();
+                } else {
+                  start_button_front.style.display = 'inline-block';
+                  var recognition_front = new webkitSpeechRecognition();
+                  recognition_front.continuous = true;
+                  recognition_front.interimResults = true;
+                  recognition_front.onstart = function() {
+                    recognizing_front = true;
+                    showInfo('info_speak_now');
+                    // start_img.src = 'mic-animate.gif';
+                  };
+                  recognition_front.onerror = function(event) {
+                    if (event.error == 'no-speech') {
+                      showInfo('info_no_speech');
+                      ignore_onend = true;
+                    }
+                    if (event.error == 'audio-capture') {
+                      showInfo('info_no_microphone');
+                      ignore_onend = true;
+                    }
+                    if (event.error == 'not-allowed') {
+                      if (event.timeStamp - start_timestamp < 100) {
+                        showInfo('info_blocked');
+                      } else {
+                        showInfo('info_denied');
+                      }
+                      ignore_onend = true;
+                    }
+                  };
+                  recognition_front.onend = function() {
+                    recognizing_front = false;
+                    if (ignore_onend) {
+                      return;
+                    }
+                    // start_img.src = 'mic.gif';
+                    if (!final_transcript_front) {
+                      showInfo('info_start');
+                      return;
+                    }
+                    showInfo('');
+                    if (window.getSelection) {
+                      window.getSelection().removeAllRanges();
+                      var range = document.createRange();
+                      range.selectNode(document.getElementById('final_span_front'));
+                      window.getSelection().addRange(range);
+                    }
+                  };
+                  recognition_front.onresult = function(event) {
+                    var interim_transcript_front = '';
+                    for (var i = event.resultIndex; i < event.results.length; ++i) {
+                      if (event.results[i].isFinal) {
+                        final_transcript_front += event.results[i][0].transcript;
+                      } else {
+                        interim_transcript_front += event.results[i][0].transcript;
+                      }
+                    }
+                    // translate(final_transcript, 'en');
+                    final_transcript_front = capitalize(final_transcript_front);
+                    final_span_front.innerHTML = linebreak(final_transcript_front);
+                    // interim_span_front.innerHTML = linebreak(interim_transcript_front);
                     
                     // if (final_transcript) {
                     //   startTranslate(final_transcript, 'fr');
                     // }
 
                     
-                    startTranslate(interim_transcript, 'zh');
+                    startTranslate(interim_transcript_front, 'ko', 'lower');
                     
                     
-                    if (final_transcript || interim_transcript) {
+                    if (final_transcript_front || interim_transcript_front) {
                       showButtons('inline-block');
                     }
                   };
                 }
+
+
+
+
+
+
+
                 function upgrade() {
                   start_button.style.visibility = 'hidden';
                   showInfo('info_upgrade');
@@ -262,30 +345,28 @@
                   ignore_onend = false;
                   final_span.innerHTML = '';
                   interim_span.innerHTML = '';
-                  start_img.src = 'mic-slash.gif';
                   showInfo('info_allow');
                   showButtons('none');
                   start_timestamp = event.timeStamp;
                 }
                 
                 function startButtonFront(event) {
-                  if (recognizing) {
-                    recognition.stop();
+                  if (recognizing_front) {
+                    recognition_front.stop();
                     return;
                   }
-                  final_transcript = '';
-                  recognition.lang = select_dialect.value;
-                  recognition.start();
-                  ignore_onend = false;
-                  final_span.innerHTML = '';
-                  interim_span.innerHTML = '';
-                  start_img.src = 'mic-slash.gif';
+                  final_transcript_front = '';
+                  recognition_front.lang = select_dialect.value;
+                  recognition_front.start();
+                  ignore_onend_front = false;
+                  final_span_front.innerHTML = '';
+                  interim_span_front.innerHTML = '';
                   showInfo('info_allow');
                   showButtons('none');
-                  start_timestamp = event.timeStamp;
+                  start_timestamp_front = event.timeStamp;
                 }
                 
-                function startTranslate(message, country) {
+                function startTranslate(message, country, section) {
                   // console.log(message);
                   // console.log(country);
                   
@@ -295,9 +376,16 @@
                         });
                   // console.log('emitted')
                   socket.on('translated', function(data){
-                      console.log(data.tr_message);
-                      final_transcript = data.tr_message;
-                      console.log(upper_translated);
+                      // console.log(data.tr_message);
+                      if (section == 'upper') {
+                        final_transcript = data.tr_message;
+                      }
+                      else {
+                        console.log(data.tr_message);
+                        final_transcript_front = data.tr_message;
+                      }
+
+                      // console.log(upper_translated);
                   });
 
                   

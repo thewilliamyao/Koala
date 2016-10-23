@@ -73,7 +73,7 @@
     min-height: 150px;
     border-radius: 25px;
   }
-  #results-you {
+  #results-front {
     font-size: 14px;
     font-weight: bold;
     border: 1px solid #ddd;
@@ -123,11 +123,11 @@
   .facing-me select:hover, .facing-me button:hover {
     box-shadow: 0 0 6px rgba(200, 0, 40, 1);
   }
-  .facing-you {
+  .facing-front {
     text-align: right;
     margin: 10px
   }
-  .facing-you select:hover, .facing-you button:hover {
+  .facing-front select:hover, .facing-front button:hover {
     box-shadow: 0 0 6px rgba(10, 0, 240, 1);
   }
 </style>

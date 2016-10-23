@@ -26,9 +26,9 @@ var local_translation = '';
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.on('untranslated', function (data) {
-    console.log(data);
+    // console.log(data);
     translateStuff(data.data_message, data.data_country);
-    console.log(local_translation);
+    // console.log(local_translation);
     socket.emit('translated', { tr_message: local_translation });
   });
 });
