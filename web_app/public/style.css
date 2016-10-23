@@ -1,0 +1,133 @@
+<style>
+  * {
+    font-family: Verdana, Arial, sans-serif;
+  }
+  a:link {
+    color:#000;
+    text-decoration: none;
+  }
+  a:visited {
+    color:#000;
+  }
+  a:hover {
+    color:#33F;
+  }
+  .button {
+    background: -webkit-linear-gradient(top,#008dfd 0,#0370ea 100%);
+    border: 1px solid #076bd2;
+    border-radius: 3px;
+    color: #fff;
+    display: none;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.3;
+    padding: 8px 25px;
+    text-align: center;
+    text-shadow: 1px 1px 1px #076bd2;
+    letter-spacing: normal;
+  }
+  .center {
+    padding: 10px;
+    text-align: center;
+  }
+  .final {
+    color: black;
+    padding-right: 3px; 
+  }
+  .interim {
+    color: gray;
+  }
+  .info {
+    font-size: 14px;
+    text-align: center;
+    color: #777;
+    display: none;
+  }
+  .right {
+    float: right;
+  }
+  .sidebyside {
+    display: inline-block;
+    width: 45%;
+    min-height: 40px;
+    text-align: left;
+    vertical-align: top;
+  }
+  #headline {
+    font-size: 40px;
+    font-weight: 300;
+  }
+  #info {
+    font-size: 20px;
+    text-align: center;
+    color: #777;
+    visibility: hidden;
+  }
+  #results {
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #ddd;
+    /*padding: 15px;*/
+    margin: 10px;
+    text-align: left;
+    min-height: 150px;
+    border-radius: 25px;
+  }
+  #results-you {
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #ddd;
+    /*padding: 15px;*/
+    margin: 10px;
+    text-align: left;
+    min-height: 150px;
+    border-radius: 25px;
+  }
+  #start_button {
+    color: white;
+    border: 0;
+    background-color: black;
+    padding: 20px;
+    margin-right: 5px;
+    border-radius: 25px;
+    font-size: 14px;
+  }
+  #start_button_front {
+    color: white;
+    border: 0;
+    background-color: black;
+    padding: 20px;
+    border-radius: 25px;
+    font-size: 14px;
+  }
+  .pressables {
+    display: inline-block;
+  }
+  .pressables select{
+    border: 1px solid #111;
+    background: transparent;
+    width: 150px;
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    height: 34px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 25px;
+  }
+  .facing-me {
+    text-align: left;
+    margin: 10px;
+  }
+  .facing-me select:hover, .facing-me button:hover {
+    box-shadow: 0 0 6px rgba(200, 0, 40, 1);
+  }
+  .facing-you {
+    text-align: right;
+    margin: 10px
+  }
+  .facing-you select:hover, .facing-you button:hover {
+    box-shadow: 0 0 6px rgba(10, 0, 240, 1);
+  }
+</style>
